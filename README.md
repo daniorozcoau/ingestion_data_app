@@ -6,22 +6,22 @@ Desktop application for ingesting raw hyperspectral data from the HySpex Mjolnir
 
 ## What it does
 
-- Copies raw camera files (`.hdr`, `.hyspex`) into the GHG-MONITOR folder structure
-- Renames files according to the Data Management Protocol (DMP) naming convention
+- Copies raw camera files (`.hdr`, `.hyspex`) into the data_management_protocol_1.1 folder structure
+- Renames files according to the data_management_protocol_1.1 naming convention
 - Verifies file integrity with MD5 checksums
-- Automatically generates a `campaign_meta.yaml` from the camera HDR file
+- Automatically generates a `campaign_meta.yaml` based on data_management_protocol_1.1 from the camera HDR file
 - Logs all ingestion steps
 
 ---
 
 ## Download
 
-Go to the [Releases](../../releases) page and download the latest version for your platform.
+Go to the [Releases](../../releases) page and download the latest version for your platform
 
 | Platform | File |
 |----------|------|
 | macOS    | `hyperspectral_data_ingestion_mac.zip` |
-| Windows  | Coming soon |
+| Windows  | Next task to develop |
 
 ---
 
@@ -29,9 +29,8 @@ Go to the [Releases](../../releases) page and download the latest version for yo
 
 1. Download `hyperspectral_data_ingestion_mac.zip` from the Releases page
 2. Double-click the zip to extract it
-3. Move `hyperspectral_data_ingestion.app` to your Applications folder (optional)
-4. **First time only** — macOS will block the app because it is not signed by an Apple developer:
-   - Right-click the `.app` → **Open**
+3. **First time only** — macOS will block the app because it is not signed by an Apple developer:
+   - Right-click the `.app` --> **Open**
    - Click **Open** in the dialog that appears
    - The app will open and from now on you can double-click it normally
 
@@ -41,7 +40,8 @@ Go to the [Releases](../../releases) page and download the latest version for yo
 
 ### Before your first experiment
 
-Create a folder on your computer where all GHG-MONITOR data will be stored. This folder should be **outside** any code or project folders — for example:
+Create a folder on your computer where all GHG-MONITOR data will be stored
+For example:
 
 ```
 /Users/yourname/Desktop/ghg-monitor-data
@@ -105,7 +105,7 @@ If something goes wrong, check the log output in the app for error messages. For
 
 ---
 
-## For developers
+## Reproducibility
 
 See [`build/build_mac.sh`](build/build_mac.sh) for the Mac build script.
 
