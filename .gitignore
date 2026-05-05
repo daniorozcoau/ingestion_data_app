@@ -220,3 +220,4 @@ dist/
 build/
 *.spec
 ghg-app-tk/
+.python-version
