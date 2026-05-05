@@ -29,7 +29,7 @@ Go to the [Releases](../../releases) page and download the latest version for yo
 
 1. Download `hyperspectral_data_ingestion_mac.zip` from the Releases page
 2. Double-click the zip to extract it
-3. **First time only** — macOS will block the app because it is not signed by an Apple developer:
+3. **First time only** - macOS will block the app because it is not signed by an Apple developer:
    - Right-click the `.app` --> **Open**
    - Click **Open** in the dialog that appears
    - The app will open and from now on you can double-click it normally
@@ -58,7 +58,7 @@ For example:
 | **Raw files folder** | The folder containing the `.hdr` and `.hyspex` files from the camera |
 | **Data root folder** | Your `ghg-monitor-data` folder |
 | **Site ID** | The site identifier e.g. `LAB_AAR01` (see DMP) |
-| **Campaign ID** | Leave empty — auto-generated from the HDR acquisition date |
+| **Campaign ID** | Leave empty - auto-generated from the HDR acquisition date |
 | **Platform** | `GND` for tripod/ground, `AIR` for drone |
 | **Operator name** | Your full name |
 | **Target gas** | The gas being measured e.g. `CH4` |
