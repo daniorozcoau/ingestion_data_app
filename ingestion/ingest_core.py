@@ -4,7 +4,7 @@ GHG-MONITOR — Core ingestion logic.
 
 Contains the pure ingestion logic with no dependency on argparse or loguru.
 Used by both:
-  - ingestion/00_ingest.py  (CLI)
+  - ingestion/00_ingest (CLI)
   - app/ingest_app.py       (desktop UI)
 
 The log_callback parameter accepts any callable(level: str, message: str)
