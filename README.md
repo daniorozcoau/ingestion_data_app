@@ -20,7 +20,7 @@ Go to the [Releases](../../releases) page and download the latest version for yo
 
 | Platform | File |
 |----------|------|
-| macOS    | `hyperspectral_data_ingestion_mac.zip` |
+| macOS    | `hyperspectral_data_ingestion_mac_1.1.zip` |
 | Windows  | Next task to develop |
 
 ---
