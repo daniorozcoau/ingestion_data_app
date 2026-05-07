@@ -128,13 +128,13 @@ class IngestApp(tk.Tk):
         self._combo_row(f, "Target gas", self._target_gas_var, GAS_OPTIONS)
         self._entry_row(f, "End time (UTC)", self._time_end_var, "e.g. 10:02:00")
 
-        self._section(f, "⚙️  References")
-        self._white_ref_var = tk.StringVar(value="no")
-        self._dark_ref_var  = tk.StringVar(value="no")
-        self._gps_log_var   = tk.StringVar(value="no")
-        self._combo_row(f, "White reference", self._white_ref_var, YESNO_OPTIONS)
-        self._combo_row(f, "Dark reference",  self._dark_ref_var,  YESNO_OPTIONS)
-        self._combo_row(f, "GPS log",         self._gps_log_var,   YESNO_OPTIONS)
+        # self._section(f, "⚙️  References")
+        # self._white_ref_var = tk.StringVar(value="no")
+        # self._dark_ref_var  = tk.StringVar(value="no")
+        # self._gps_log_var   = tk.StringVar(value="no")
+        # self._combo_row(f, "White reference", self._white_ref_var, YESNO_OPTIONS)
+        # self._combo_row(f, "Dark reference",  self._dark_ref_var,  YESNO_OPTIONS)
+        # self._combo_row(f, "GPS log",         self._gps_log_var,   YESNO_OPTIONS)
 
         self._section(f, "📝  Notes")
         notes_outer = tk.Frame(f, bg=BG)
@@ -298,9 +298,9 @@ class IngestApp(tk.Tk):
             "operator":       self._operator_var.get().strip(),
             "target_gas":     self._target_gas_var.get(),
             "time_end":       self._time_end_var.get().strip() or None,
-            "white_ref":      self._white_ref_var.get(),
-            "dark_ref":       self._dark_ref_var.get(),
-            "gps_log":        self._gps_log_var.get(),
+            # "white_ref":      self._white_ref_var.get(),
+            # "dark_ref":       self._dark_ref_var.get(),
+            # "gps_log":        self._gps_log_var.get(),
             "notes":          self._notes_text.get("1.0", "end").strip(),
             "sensor":         None,
             "serial_number":  None,
