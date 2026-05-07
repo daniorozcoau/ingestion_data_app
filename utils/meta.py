@@ -184,15 +184,15 @@ class CampaignMeta:
     operator: str = ""
     platform: str = ""
     target_gas: str = ""
-    white_ref_acquired: str = ""
-    dark_ref_acquired: str = ""
-    gps_log: str = ""
+    # white_ref_acquired: str = ""
+    # dark_ref_acquired: str = ""
+    # gps_log: str = ""
     notes: str = ""
 
-    # Auto-populated from HDR
+    # Auto-filled from HDR
     date_utc: str = ""
     time_start_utc: str = ""
-    time_end_utc: str = ""
+    # time_end_utc: str = ""
     sensor: str = ""
     serial_number: str = ""
     integration_time_ms: str = ""
@@ -267,7 +267,7 @@ def write_campaign_meta(meta: CampaignMeta, output_path: Union[str, Path]) -> No
         "acquisition": {
             "date_utc":       meta.date_utc,
             "time_start_utc": meta.time_start_utc,
-            "time_end_utc":   meta.time_end_utc,
+            # "time_end_utc":   meta.time_end_utc,
             "operator":       meta.operator,
             "platform":       meta.platform,
             "target_gas":     meta.target_gas,
@@ -284,12 +284,14 @@ def write_campaign_meta(meta: CampaignMeta, output_path: Union[str, Path]) -> No
             "binning":             meta.binning,
             "camera_config":       meta.camera_config,
             "scanning_mode":       meta.scanning_mode,
-        },
-        "references": {
-            "white_ref_acquired": meta.white_ref_acquired,
-            "dark_ref_acquired":  meta.dark_ref_acquired,
-            "gps_log":            meta.gps_log,
-        },
+        }
+        # ,
+        # "references": {
+        #     "white_ref_acquired": meta.white_ref_acquired,
+        #     "dark_ref_acquired":  meta.dark_ref_acquired,
+        #     "gps_log":            meta.gps_log,
+        # }
+        ,
         "drone": {
             "aircraft_type":     meta.aircraft_type,
             "flight_altitude_m": meta.flight_altitude_m,
@@ -334,7 +336,7 @@ def read_campaign_meta(meta_path: Union[str, Path]) -> CampaignMeta:
     acq = data.get("acquisition", {})
     meta.date_utc            = acq.get("date_utc", "")
     meta.time_start_utc      = acq.get("time_start_utc", "")
-    meta.time_end_utc        = acq.get("time_end_utc", "")
+    # meta.time_end_utc        = acq.get("time_end_utc", "")
     meta.operator            = acq.get("operator", "")
     meta.platform            = acq.get("platform", "")
     meta.target_gas          = acq.get("target_gas", "")
@@ -352,10 +354,10 @@ def read_campaign_meta(meta_path: Union[str, Path]) -> CampaignMeta:
     meta.camera_config       = sen.get("camera_config", "")
     meta.scanning_mode       = sen.get("scanning_mode", "")
 
-    ref = data.get("references", {})
-    meta.white_ref_acquired  = ref.get("white_ref_acquired", "")
-    meta.dark_ref_acquired   = ref.get("dark_ref_acquired", "")
-    meta.gps_log             = ref.get("gps_log", "")
+    # ref = data.get("references", {})
+    # meta.white_ref_acquired  = ref.get("white_ref_acquired", "")
+    # meta.dark_ref_acquired   = ref.get("dark_ref_acquired", "")
+    # meta.gps_log             = ref.get("gps_log", "")
 
     drone = data.get("drone", {})
     meta.aircraft_type       = drone.get("aircraft_type", "~")
@@ -465,10 +467,10 @@ if __name__ == "__main__":
     camp_meta.operator           = args.operator
     camp_meta.platform           = args.platform
     camp_meta.target_gas         = args.target_gas
-    camp_meta.time_end_utc       = args.time_end
-    camp_meta.white_ref_acquired = args.white_ref
-    camp_meta.dark_ref_acquired  = args.dark_ref
-    camp_meta.gps_log            = args.gps_log
+    # camp_meta.time_end_utc       = args.time_end
+    # camp_meta.white_ref_acquired = args.white_ref
+    # camp_meta.dark_ref_acquired  = args.dark_ref
+    # camp_meta.gps_log            = args.gps_log
     camp_meta.notes              = args.notes
     camp_meta.original_filename  = args.hdr.stem
 

@@ -223,10 +223,10 @@ def run_ingestion(params: dict, log_callback: Callable) -> None:
         camp_meta.operator           = params.get("operator", "")
         camp_meta.platform           = platform
         camp_meta.target_gas         = params.get("target_gas", "")
-        camp_meta.time_end_utc       = params.get("time_end") or "~"
-        camp_meta.white_ref_acquired = params.get("white_ref", "no")
-        camp_meta.dark_ref_acquired  = params.get("dark_ref", "no")
-        camp_meta.gps_log            = params.get("gps_log", "no")
+        # camp_meta.time_end_utc       = params.get("time_end") or "~"
+        # camp_meta.white_ref_acquired = params.get("white_ref", "no")
+        # camp_meta.dark_ref_acquired  = params.get("dark_ref", "no")
+        # camp_meta.gps_log            = params.get("gps_log", "no")
         camp_meta.notes              = params.get("notes", "")
         camp_meta.original_filename  = captures[0]["hdr"].stem
 
