@@ -20,7 +20,7 @@ Go to the [Releases](../../releases) page and download the latest version for yo
 
 | Platform | File |
 |----------|------|
-| macOS    | `hyperspectral_data_ingestion_mac.zip` |
+| macOS    | `hyperspectral_data_ingestion_mac_1.1.zip` |
 | Windows  | Next task to develop |
 
 ---
@@ -63,9 +63,6 @@ For example:
 | **Operator name** | Your full name |
 | **Target gas** | The gas being measured e.g. `CH4` |
 | **End time (UTC)** | The time you finished the recording |
-| **White reference** | Whether a white reference panel was captured |
-| **Dark reference** | Whether a dark reference was captured |
-| **GPS log** | Whether a GPS log is available |
 | **Notes** | Any relevant observations about the experiment |
 
 4. Click **▶ Run Ingestion**
