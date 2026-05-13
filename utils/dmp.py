@@ -12,6 +12,8 @@ from typing import Optional, List
 
 SITE_TYPE_CODES = {"WET", "BIO", "OIL", "AGR", "URB", "LAB"}
 
+SITE_LOCATION_CODES= {"AAR"}
+
 SENSOR_CODES = {"MJL", "MJS"}
 
 PLATFORMS = {"AIR", "GND"}
