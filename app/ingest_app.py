@@ -19,12 +19,17 @@ from tkinter import filedialog, ttk, messagebox
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from utils.dmp import SITE_TYPE_CODES
+from utils.dmp import SITE_LOCATION_CODES
+
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 GAS_OPTIONS       = ["CH4", "CO2", "N2O", "Other"]
 OPERATOR_NAME = ["DANIEL", "SOPHIE", "CHRISTOFFER","JESPER"]
 PLATFORM_OPTIONS  = ["GND", "AIR"]
 DATATYPE_OPTIONS  = ["raw", "hyrad"]
+SITE_TYPE_OPTIONS = sorted(SITE_TYPE_CODES)  # e.g. ["AGR", "BIO", "LAB", ...]
+SITE_LOCATION_OPTIONS = sorted(SITE_LOCATION_CODES)
 
 BG          = "#2b2b2b"
 BG_CARD     = "#3c3f41"
@@ -111,12 +116,15 @@ class IngestApp(tk.Tk):
 
         # ── Campaign ──────────────────────────────────────────────────────────
         self._section(f, "🗂  Campaign")
-        self._site_id_var  = tk.StringVar()
-        self._camp_seq_var = tk.StringVar(value="01")
-        self._platform_var = tk.StringVar(value="GND")
-        self._datatype_var = tk.StringVar(value="raw")
+        self._site_type_var = tk.StringVar(value=SITE_TYPE_OPTIONS[0])
+        self._site_loc_var = tk.StringVar(value=SITE_LOCATION_OPTIONS[0])
+        #self._site_loc_var  = tk.StringVar()
+        self._site_num_var  = tk.StringVar(value="01")
+        self._camp_seq_var  = tk.StringVar(value="01")
+        self._platform_var  = tk.StringVar(value="GND")
+        self._datatype_var  = tk.StringVar(value="raw")
 
-        self._entry_row(f, "Site ID", self._site_id_var, "e.g. LAB_AAR01")
+        self._site_id_row(f)
         self._campaign_id_row(f)
         self._combo_row(f, "Platform", self._platform_var, PLATFORM_OPTIONS)
         self._combo_row(f, "Data type", self._datatype_var, DATATYPE_OPTIONS)
@@ -125,10 +133,10 @@ class IngestApp(tk.Tk):
         self._section(f, "👤  Operator")
         self._operator_var   = tk.StringVar()
         self._target_gas_var = tk.StringVar(value="CH4")
-        #self._time_end_var   = tk.StringVar()
+        # self._time_end_var   = tk.StringVar()
         self._combo_row(f, "Operator name", self._operator_var, OPERATOR_NAME)
         self._combo_row(f, "Target gas", self._target_gas_var, GAS_OPTIONS)
-        #self._entry_row(f, "End time (UTC)", self._time_end_var, "e.g. 10:02:00")
+        # self._entry_row(f, "End time (UTC)", self._time_end_var, "e.g. 10:02:00")
 
         # ── Notes ─────────────────────────────────────────────────────────────
         self._section(f, "📝  Notes")
@@ -211,7 +219,71 @@ class IngestApp(tk.Tk):
                   activebackground="#555", padx=8,
                   command=browse).pack(side="left")
 
+    def _site_id_row(self, parent):
+        """
+        Site ID row: [ TYPE ▾ ] _ [ LOC ] _ [ ## ]
+        Assembled as TYPE_LOC## e.g. LAB_AAR01
+        """
+        row = tk.Frame(parent, bg=BG)
+        row.pack(fill="x", padx=16, pady=4)
+
+        tk.Label(row, text="Site ID", bg=BG, fg=FG, font=FONT,
+                 width=LABEL_WIDTH, anchor="w").pack(side="left")
+
+        # Site type — dropdown
+        ttk.Combobox(row, textvariable=self._site_type_var,
+                     values=SITE_TYPE_OPTIONS, state="readonly",
+                     font=FONT, width=6).pack(side="left", ipady=3)
+
+        tk.Label(row, text="_", bg=BG, fg=FG_AUTO,
+                 font=FONT_BOLD).pack(side="left", padx=2)
+
+        # Location — 3 letter free text
+
+        ttk.Combobox(row, textvariable=self._site_loc_var,
+                     values=SITE_LOCATION_OPTIONS, state="readonly",
+                     font=FONT, width=6).pack(side="left", ipady=3)
+
+        tk.Label(row, text="_", bg=BG, fg=FG_AUTO,
+                 font=FONT_BOLD).pack(side="left", padx=2)
+
+        # loc_entry = tk.Entry(row, textvariable=self._site_loc_var,
+        #                      bg=BG_ENTRY, fg=FG, font=FONT, relief="flat",
+        #                      insertbackground=FG,
+        #                      highlightthickness=1, highlightbackground="#555",
+        #                      width=5)
+        # loc_entry.pack(side="left", ipady=4)
+        #
+        # tk.Label(row, text="_", bg=BG, fg=FG_AUTO,
+        #          font=FONT_BOLD).pack(side="left", padx=2)
+
+        # Number — 2 digit
+        tk.Entry(row, textvariable=self._site_num_var,
+                 bg=BG_ENTRY, fg=FG, font=FONT, relief="flat",
+                 insertbackground=FG,
+                 highlightthickness=1, highlightbackground="#555",
+                 width=4).pack(side="left", ipady=4, padx=(0, 8))
+
+        # Preview
+        self._site_id_preview_var = tk.StringVar()
+        tk.Label(row, textvariable=self._site_id_preview_var,
+                 bg=BG, fg=FG_AUTO, font=FONT).pack(side="left")
+
+        # Update preview on any change
+        for var in (self._site_type_var, self._site_loc_var, self._site_num_var):
+            var.trace_add("write", self._update_site_id_preview)
+
+        self._update_site_id_preview()
+
+    def _update_site_id_preview(self, *_):
+        site_id = self._build_site_id()
+        self._site_id_preview_var.set(f"→  {site_id}" if site_id else "")
+
     def _campaign_id_row(self, parent):
+        """
+        Campaign ID row: [ YYYYMMDD ] C [ ## ] (sequence number)
+        Date auto-filled from HDR.
+        """
         row = tk.Frame(parent, bg=BG)
         row.pack(fill="x", padx=16, pady=4)
 
@@ -226,14 +298,12 @@ class IngestApp(tk.Tk):
                  highlightthickness=1, highlightbackground="#555",
                  state="readonly", width=10).pack(side="left", ipady=4, padx=(0, 2))
 
-        # Literal "C"
         tk.Label(row, text="C", bg=BG, fg=FG_AUTO,
                  font=FONT_BOLD).pack(side="left", padx=2)
 
-        # Sequence — operator types this
         tk.Entry(row, textvariable=self._camp_seq_var,
-                 bg=BG_ENTRY, fg=FG,
-                 font=FONT, relief="flat", insertbackground=FG,
+                 bg=BG_ENTRY, fg=FG, font=FONT, relief="flat",
+                 insertbackground=FG,
                  highlightthickness=1, highlightbackground="#555",
                  width=4).pack(side="left", ipady=4, padx=(2, 8))
 
@@ -276,6 +346,16 @@ class IngestApp(tk.Tk):
         ttk.Combobox(row, textvariable=var, values=options,
                      state="readonly", font=FONT, width=16).pack(side="left", ipady=3)
 
+    # ── Site ID assembly ───────────────────────────────────────────────────────
+
+    def _build_site_id(self) -> str:
+        site_type = self._site_type_var.get().strip().upper()
+        location  = self._site_loc_var.get().strip().upper()
+        number    = self._site_num_var.get().strip().zfill(2)
+        if site_type and location and number:
+            return f"{site_type}_{location}{number}"
+        return ""
+
     # ── HDR auto-read on browse ────────────────────────────────────────────────
 
     def _on_source_browsed(self, folder: str):
@@ -310,14 +390,23 @@ class IngestApp(tk.Tk):
             errors.append("Raw files folder does not exist.")
         if not self._data_root_var.get().strip():
             errors.append("Data root folder is required.")
-        if not self._site_id_var.get().strip():
-            errors.append("Site ID is required.")
-        if not self._operator_var.get().strip():
-            errors.append("Operator name is required.")
         if not self._hdr_date:
             errors.append("Could not detect date from HDR. Check the raw files folder.")
         if not self._camp_seq_var.get().strip().isdigit():
-            errors.append("Campaign sequence number must be a number e.g. 01")
+            errors.append("Campaign sequence number must be a number e.g. 01.")
+
+        # Site ID validation
+        # loc = self._site_loc_var.get().strip()
+        num = self._site_num_var.get().strip()
+        # if not loc:
+        #     errors.append("Site location is required e.g. AAR.")
+        # elif not loc.isalpha() or len(loc) != 3:
+        #     errors.append("Site location must be exactly 3 letters e.g. AAR.")
+        if not num.isdigit():
+            errors.append("Site number must be a number e.g. 01.")
+
+        if not self._operator_var.get().strip():
+            errors.append("Operator name is required.")
         return errors
 
     # ── Run ────────────────────────────────────────────────────────────────────
@@ -337,13 +426,13 @@ class IngestApp(tk.Tk):
         params = {
             "source_folder":  self._source_var.get().strip(),
             "data_root":      self._data_root_var.get().strip(),
-            "site_id":        self._site_id_var.get().strip(),
+            "site_id":        self._build_site_id(),
             "campaign_id":    self._build_campaign_id(),
             "platform":       self._platform_var.get(),
             "data_type":      self._datatype_var.get(),
             "operator":       self._operator_var.get().strip(),
             "target_gas":     self._target_gas_var.get(),
-            #"time_end":       self._time_end_var.get().strip() or None,
+            # "time_end":       self._time_end_var.get().strip() or None,
             "notes":          self._notes_text.get("1.0", "end").strip(),
             "sensor":         None,
             "serial_number":  None,
