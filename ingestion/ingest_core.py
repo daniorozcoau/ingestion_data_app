@@ -17,7 +17,7 @@ import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -113,6 +113,9 @@ def run_ingestion(params: dict, log_callback: Callable) -> None:
 
     Args:
         params:       Dict of ingestion parameters (mirrors CLI args).
+                      Key params:
+                        - data_type: "raw" or "hyrad" — which subfolder to copy into
+                        - platform:  "GND" or "AIR"   — goes into the DMP filename only
         log_callback: callable(level: str, message: str) for routing log output.
 
     Raises:
@@ -147,17 +150,30 @@ def run_ingestion(params: dict, log_callback: Callable) -> None:
     log("INFO", f"Campaign ID : {campaign_id}")
     log("INFO", f"Site ID     : {site_id}")
 
-    # ── Folders ───────────────────────────────────────────────────────────
-    platform           = params.get("platform", "GND")
-    platform_subfolder = "hyrad" if platform == "GND" else "hyair"
-    campaign_dir       = site_campaigns_dir / campaign_id
-    raw_dir            = campaign_dir / "raw" / platform_subfolder
-    logs_dir           = campaign_dir / "logs"
+    # ── Folder structure ───────────────────────────────────────────────────
+    # data_type determines which subfolder files are copied into:
+    #   "raw"   → campaign_dir/raw/
+    #   "hyrad" → campaign_dir/hyrad/
+    # platform (GND/AIR) is only used in the DMP filename, not the folder.
 
-    raw_dir.mkdir(parents=True, exist_ok=True)
-    logs_dir.mkdir(parents=True, exist_ok=True)
+    platform  = params.get("platform", "GND")
+    data_type = params.get("data_type", "raw")  # "raw" or "hyrad"
 
-    log("INFO", f"Destination : {raw_dir}")
+    if data_type not in ("raw", "hyrad"):
+        log("ERROR", f"Invalid data_type '{data_type}'. Must be 'raw' or 'hyrad'.")
+        raise SystemExit(1)
+
+    campaign_dir = site_campaigns_dir / campaign_id
+
+    # Create full campaign structure
+    (campaign_dir / "raw").mkdir(parents=True, exist_ok=True)
+    (campaign_dir / "hyrad").mkdir(parents=True, exist_ok=True)
+    (campaign_dir / "logs").mkdir(parents=True, exist_ok=True)
+
+    destination_dir = campaign_dir / data_type
+
+    log("INFO", f"Data type   : {data_type}")
+    log("INFO", f"Destination : {destination_dir}")
 
     # ── Sensor info ───────────────────────────────────────────────────────
     sensor_code = hdr_meta.sensor_code or params.get("sensor")
@@ -197,7 +213,7 @@ def run_ingestion(params: dict, log_callback: Callable) -> None:
                 level="L0",
                 extension=ext,
             )
-            dst_path = raw_dir / dmp_name
+            dst_path = destination_dir / dmp_name
 
             shutil.copy2(src_path, dst_path)
 
@@ -217,18 +233,14 @@ def run_ingestion(params: dict, log_callback: Callable) -> None:
     if meta_path.exists() and not params.get("overwrite_meta", False):
         log("INFO", "campaign_meta.yaml already exists — skipping")
     else:
-        camp_meta                    = campaign_meta_from_hdr(hdr_meta)
-        camp_meta.campaign_id        = campaign_id
-        camp_meta.site_id            = site_id
-        camp_meta.operator           = params.get("operator", "")
-        camp_meta.platform           = platform
-        camp_meta.target_gas         = params.get("target_gas", "")
-        # camp_meta.time_end_utc       = params.get("time_end") or "~"
-        # camp_meta.white_ref_acquired = params.get("white_ref", "no")
-        # camp_meta.dark_ref_acquired  = params.get("dark_ref", "no")
-        # camp_meta.gps_log            = params.get("gps_log", "no")
-        camp_meta.notes              = params.get("notes", "")
-        camp_meta.original_filename  = captures[0]["hdr"].stem
+        camp_meta                   = campaign_meta_from_hdr(hdr_meta)
+        camp_meta.campaign_id       = campaign_id
+        camp_meta.site_id           = site_id
+        camp_meta.operator          = params.get("operator", "")
+        camp_meta.platform          = platform
+        camp_meta.target_gas        = params.get("target_gas", "")
+        camp_meta.notes             = params.get("notes", "")
+        camp_meta.original_filename = captures[0]["hdr"].stem
 
         write_campaign_meta(camp_meta, meta_path)
         log("INFO", f"campaign_meta.yaml written: {meta_path}")

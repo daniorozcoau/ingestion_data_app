@@ -21,20 +21,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
-GAS_OPTIONS      = ["CH4", "CO2", "N2O", "Other"]
+GAS_OPTIONS       = ["CH4", "CO2", "N2O", "Other"]
 OPERATOR_NAME = ["DANIEL", "SOPHIE", "CHRISTOFFER","JESPER"]
-PLATFORM_OPTIONS = ["GND", "AIR"]
-YESNO_OPTIONS    = ["yes", "no"]
+PLATFORM_OPTIONS  = ["GND", "AIR"]
+DATATYPE_OPTIONS  = ["raw", "hyrad"]
 
-BG        = "#2b2b2b"
-BG_CARD   = "#3c3f41"
-BG_HEADER = "#1a5c96"
-BG_ENTRY  = "#45494a"
+BG          = "#2b2b2b"
+BG_CARD     = "#3c3f41"
+BG_HEADER   = "#1a5c96"
+BG_ENTRY    = "#45494a"
 BG_READONLY = "#3a3a3a"
-FG        = "#bbbbbb"
-FG_BRIGHT = "#ffffff"
-FG_DIM    = "#888888"
-FG_AUTO   = "#4a9fd4"  # colour for auto-filled fields
+FG          = "#bbbbbb"
+FG_BRIGHT   = "#ffffff"
+FG_DIM      = "#888888"
+FG_AUTO     = "#4a9fd4"
 
 LOG_COLORS = {
     "INFO":    "#4a9fd4",
@@ -63,8 +63,8 @@ class IngestApp(tk.Tk):
         self.configure(bg=BG)
         self.resizable(True, True)
 
-        self._log_queue   = queue.Queue()
-        self._hdr_date    = ""  # date string read from HDR e.g. "20260422"
+        self._log_queue = queue.Queue()
+        self._hdr_date  = ""
 
         self._build_ui()
         self._poll_log_queue()
@@ -112,22 +112,23 @@ class IngestApp(tk.Tk):
         # ── Campaign ──────────────────────────────────────────────────────────
         self._section(f, "🗂  Campaign")
         self._site_id_var  = tk.StringVar()
-        self._camp_seq_var = tk.StringVar(value="01")  # operator types only ##
+        self._camp_seq_var = tk.StringVar(value="01")
         self._platform_var = tk.StringVar(value="GND")
+        self._datatype_var = tk.StringVar(value="raw")
 
         self._entry_row(f, "Site ID", self._site_id_var, "e.g. LAB_AAR01")
-        self._campaign_id_row(f)  # special row with date + sequence
+        self._campaign_id_row(f)
         self._combo_row(f, "Platform", self._platform_var, PLATFORM_OPTIONS)
+        self._combo_row(f, "Data type", self._datatype_var, DATATYPE_OPTIONS)
 
         # ── Operator ──────────────────────────────────────────────────────────
         self._section(f, "👤  Operator")
         self._operator_var   = tk.StringVar()
         self._target_gas_var = tk.StringVar(value="CH4")
-        # self._time_end_var   = tk.StringVar()
-        # self._entry_row(f, "Operator name", self._operator_var, "Your full name")
+        #self._time_end_var   = tk.StringVar()
         self._combo_row(f, "Operator name", self._operator_var, OPERATOR_NAME)
         self._combo_row(f, "Target gas", self._target_gas_var, GAS_OPTIONS)
-        # self._entry_row(f, "End time (UTC)", self._time_end_var, "e.g. 10:02:00")
+        #self._entry_row(f, "End time (UTC)", self._time_end_var, "e.g. 10:02:00")
 
         # ── Notes ─────────────────────────────────────────────────────────────
         self._section(f, "📝  Notes")
@@ -211,13 +212,6 @@ class IngestApp(tk.Tk):
                   command=browse).pack(side="left")
 
     def _campaign_id_row(self, parent):
-        """
-        Special row for Campaign ID showing:
-        - A read-only date field (auto-filled from HDR) e.g. "20260422"
-        - A literal "C" label
-        - A small editable sequence field e.g. "01"
-        - A preview of the full campaign ID
-        """
         row = tk.Frame(parent, bg=BG)
         row.pack(fill="x", padx=16, pady=4)
 
@@ -226,26 +220,23 @@ class IngestApp(tk.Tk):
 
         # Date — read-only, auto-filled from HDR
         self._camp_date_var = tk.StringVar(value="YYYYMMDD")
-        date_entry = tk.Entry(row, textvariable=self._camp_date_var,
-                              bg=BG_READONLY, fg=FG_AUTO,
-                              font=FONT, relief="flat",
-                              highlightthickness=1, highlightbackground="#555",
-                              state="readonly", width=10)
-        date_entry.pack(side="left", ipady=4, padx=(0, 2))
+        tk.Entry(row, textvariable=self._camp_date_var,
+                 bg=BG_READONLY, fg=FG_AUTO,
+                 font=FONT, relief="flat",
+                 highlightthickness=1, highlightbackground="#555",
+                 state="readonly", width=10).pack(side="left", ipady=4, padx=(0, 2))
 
         # Literal "C"
         tk.Label(row, text="C", bg=BG, fg=FG_AUTO,
                  font=FONT_BOLD).pack(side="left", padx=2)
 
         # Sequence — operator types this
-        seq_entry = tk.Entry(row, textvariable=self._camp_seq_var,
-                             bg=BG_ENTRY, fg=FG,
-                             font=FONT, relief="flat", insertbackground=FG,
-                             highlightthickness=1, highlightbackground="#555",
-                             width=4)
-        seq_entry.pack(side="left", ipady=4, padx=(2, 8))
+        tk.Entry(row, textvariable=self._camp_seq_var,
+                 bg=BG_ENTRY, fg=FG,
+                 font=FONT, relief="flat", insertbackground=FG,
+                 highlightthickness=1, highlightbackground="#555",
+                 width=4).pack(side="left", ipady=4, padx=(2, 8))
 
-        # Helper label
         tk.Label(row, text="(sequence number)", bg=BG, fg=FG_DIM,
                  font=("Helvetica", 10)).pack(side="left")
 
@@ -282,26 +273,19 @@ class IngestApp(tk.Tk):
         row.pack(fill="x", padx=16, pady=4)
         tk.Label(row, text=label, bg=BG, fg=FG, font=FONT,
                  width=LABEL_WIDTH, anchor="w").pack(side="left")
-        cb = ttk.Combobox(row, textvariable=var, values=options,
-                          state="readonly", font=FONT, width=16)
-        cb.pack(side="left", ipady=3)
+        ttk.Combobox(row, textvariable=var, values=options,
+                     state="readonly", font=FONT, width=16).pack(side="left", ipady=3)
 
     # ── HDR auto-read on browse ────────────────────────────────────────────────
 
     def _on_source_browsed(self, folder: str):
-        """
-        Called when the operator browses to the raw files folder.
-        Reads the first HDR found and auto-fills the campaign date.
-        """
         try:
             from utils.meta import parse_hdr
             hdr_files = sorted(Path(folder).glob("*.hdr"))
             if not hdr_files:
                 return
-
             hdr_meta = parse_hdr(hdr_files[0])
             if hdr_meta.acquisition_date:
-                # Convert "2026-04-22" → "20260422"
                 date_str = hdr_meta.acquisition_date.replace("-", "")
                 self._hdr_date = date_str
                 self._camp_date_var.set(date_str)
@@ -312,7 +296,6 @@ class IngestApp(tk.Tk):
     # ── Campaign ID assembly ───────────────────────────────────────────────────
 
     def _build_campaign_id(self) -> str:
-        """Assemble the full campaign ID from date + sequence number."""
         date = self._hdr_date or self._camp_date_var.get()
         seq  = self._camp_seq_var.get().strip().zfill(2) or "01"
         return f"{date}C{seq}"
@@ -333,8 +316,7 @@ class IngestApp(tk.Tk):
             errors.append("Operator name is required.")
         if not self._hdr_date:
             errors.append("Could not detect date from HDR. Check the raw files folder.")
-        seq = self._camp_seq_var.get().strip()
-        if not seq.isdigit():
+        if not self._camp_seq_var.get().strip().isdigit():
             errors.append("Campaign sequence number must be a number e.g. 01")
         return errors
 
@@ -352,17 +334,16 @@ class IngestApp(tk.Tk):
         self._run_btn.configure(state="disabled", text="Running…")
         self._status_var.set("Running ingestion…")
 
-        campaign_id = self._build_campaign_id()
-
         params = {
             "source_folder":  self._source_var.get().strip(),
             "data_root":      self._data_root_var.get().strip(),
             "site_id":        self._site_id_var.get().strip(),
-            "campaign_id":    campaign_id,
+            "campaign_id":    self._build_campaign_id(),
             "platform":       self._platform_var.get(),
+            "data_type":      self._datatype_var.get(),
             "operator":       self._operator_var.get().strip(),
             "target_gas":     self._target_gas_var.get(),
-            # "time_end":       self._time_end_var.get().strip() or None,
+            #"time_end":       self._time_end_var.get().strip() or None,
             "notes":          self._notes_text.get("1.0", "end").strip(),
             "sensor":         None,
             "serial_number":  None,
